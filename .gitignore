@@ -1,0 +1,10 @@
+node_modules/
+tmp/
+res/
+app.log
+.DS_Store
+*.wav
+*.mp3
+__pycache__/
+.venv/
+venv/
