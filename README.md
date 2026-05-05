@@ -19,13 +19,11 @@
    ```
 2. 运行流水线：
    ```bash
-   python3 main.py x1.json
+   python3 main.py tests/pen.md
    ```
 
 ## 目录结构
 - `main.py` - 主流水线脚本
-- `test_silence.py` - 静音生成测试工具
-- `x1.json` - 示例输入（中英文句子对）
 - `res/` - 结果输出目录（运行后生成）
 - `tmp/` - 临时文件目录（运行后生成）
 

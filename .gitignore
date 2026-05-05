@@ -1,7 +1,7 @@
 node_modules/
 tmp/
 res/
-app.log
+app*.log
 .DS_Store
 *.wav
 *.mp3
@@ -9,4 +9,7 @@ __pycache__/
 .venv/
 venv/
 .agent
-tests/.worktrees/
+tests/
+.worktrees/
+.env
+docs/
