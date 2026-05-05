@@ -29,12 +29,8 @@ def step1_generate_audio(input_file, base_name):
     logger.info("="*70)
 
     # Create directories
-    if os.path.exists(TMP_DIR):
-        shutil.rmtree(TMP_DIR)
-    os.makedirs(TMP_DIR)
-
-    if not os.path.exists(RES_DIR):
-        os.makedirs(RES_DIR)
+    os.makedirs(TMP_DIR, exist_ok=True)
+    os.makedirs(RES_DIR, exist_ok=True)
 
     logger.info(f"Created directory: {TMP_DIR}")
     logger.info(f"Created directory: {RES_DIR}")
