@@ -11,6 +11,9 @@ from src.config.constants import DEFAULT_INPUT_FILE, RES_DIR, LOG_FILE
 from src.common.logger import setup_logger
 from src.tts.generator import step1_generate_audio
 from src.audio.processor import step2_merge_audio
+from src.common.gemini import get_gemini_service
+from src.config.constants import DEFAULT_INPUT_FILE, RES_DIR, LOG_FILE, TMP_DIR
+import json
 
 def parse_arguments():
     """Parse command line arguments"""
@@ -90,6 +93,30 @@ def main():
     logger.info("")
 
     try:
+        # Pre-processing: Convert Markdown to JSON using Gemini if needed
+        if INPUT_FILE.lower().endswith('.md'):
+            logger.info(f"Detecting Markdown input. Calling Gemini for preprocessing...")
+            gemini = get_gemini_service()
+            
+            with open(INPUT_FILE, 'r', encoding='utf-8') as f:
+                article_text = f.read()
+            
+            processed_data = gemini.convert_article_to_json(article_text)
+            if not processed_data:
+                logger.error("Gemini preprocessing failed.")
+                sys.exit(1)
+            
+            # Save to temporary JSON file
+            temp_json_path = os.path.join(TMP_DIR, f"{BASE_NAME}_processed.json")
+            if not os.path.exists(TMP_DIR):
+                os.makedirs(TMP_DIR)
+                
+            with open(temp_json_path, 'w', encoding='utf-8') as f:
+                json.dump(processed_data, f, ensure_ascii=False, indent=2)
+            
+            logger.info(f"Gemini preprocessing completed. Saved to {temp_json_path}")
+            INPUT_FILE = temp_json_path
+
         # Step 1: Generate audio
         step1_generate_audio(INPUT_FILE, BASE_NAME)
 
