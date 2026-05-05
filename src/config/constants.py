@@ -4,10 +4,14 @@
 import os
 
 # OpenAI TTS Configuration
-OPENAI_BASE_URL = "http://localhost:8880/v1"
+OPENAI_BASE_URL = "http://127.0.0.1:8880/v1"
 OPENAI_API_KEY = "not-needed"
 OPENAI_MODEL = "kokoro"
 OPENAI_VOICE = "af_sky+af_bella"
+
+# Gemini AI Configuration
+GEMINI_MODEL = "gemini-2.0-flash"
+GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
 
 # Audio Processing Configuration
 INITIAL_SILENCE_SEC = 0.3  # 300ms
