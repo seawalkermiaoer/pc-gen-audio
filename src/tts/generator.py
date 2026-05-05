@@ -3,12 +3,11 @@
 
 import json
 import os
-import shutil
 import sys
 import logging
-from openai import OpenAI
+import requests
 from src.config.constants import (
-    OPENAI_BASE_URL, OPENAI_API_KEY, OPENAI_MODEL, OPENAI_VOICE,
+    OPENAI_BASE_URL, OPENAI_MODEL, OPENAI_VOICE,
     TMP_DIR, RES_DIR
 )
 from src.audio.utils import get_audio_duration
@@ -20,7 +19,7 @@ def step1_generate_audio(input_file, base_name):
     Step 1: Generate WAV files for each English sentence and create step1.json
 
     - Read input_file (English-Chinese sentence pairs)
-    - Generate audio using OpenAI TTS
+    - Generate audio using TTS service (via requests for better compatibility)
     - Calculate duration of each audio file
     - Save to res/{base_name}.step1.json
     """
@@ -34,13 +33,6 @@ def step1_generate_audio(input_file, base_name):
 
     logger.info(f"Created directory: {TMP_DIR}")
     logger.info(f"Created directory: {RES_DIR}")
-
-    # Initialize OpenAI client
-    client = OpenAI(
-        base_url=OPENAI_BASE_URL,
-        api_key=OPENAI_API_KEY
-    )
-    logger.info(f"OpenAI client initialized: {OPENAI_BASE_URL} ({OPENAI_MODEL})")
 
     # Read input JSON file
     if not os.path.exists(input_file):
@@ -63,13 +55,31 @@ def step1_generate_audio(input_file, base_name):
 
         logger.info(f"[{i+1}/{len(sentences)}] Generating audio for: {english_text[:50]}...")
 
-        # Generate audio using OpenAI
-        with client.audio.speech.with_streaming_response.create(
-            model=OPENAI_MODEL,
-            voice=OPENAI_VOICE,
-            input=english_text
-        ) as response:
-            response.stream_to_file(wav_filename)
+        # Generate audio using requests (more compatible with local TTS)
+        payload = {
+            "model": OPENAI_MODEL,
+            "voice": OPENAI_VOICE,
+            "input": english_text,
+            "response_format": "mp3"
+        }
+        
+        try:
+            response = requests.post(
+                f"{OPENAI_BASE_URL}/audio/speech",
+                json=payload,
+                headers={"Content-Type": "application/json"}
+            )
+            
+            if response.status_code != 200:
+                logger.error(f"TTS Request failed with status {response.status_code}: {response.text}")
+                sys.exit(1)
+                
+            with open(wav_filename, 'wb') as f:
+                f.write(response.content)
+                
+        except Exception as e:
+            logger.error(f"TTS Request failed with exception: {e}")
+            sys.exit(1)
 
         # Get duration
         duration = get_audio_duration(wav_filename)
